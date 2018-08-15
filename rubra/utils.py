@@ -9,8 +9,9 @@ import imp
 import os
 import os.path
 from shell_command import shellCommand
-from cluster_job import PBS_Script
+from cluster_job import SGE_Script
 import re
+import time
 
 
 # A simple container object
@@ -97,7 +98,7 @@ def initLog(options):
     return {'proxy': proxy, 'mutex': mutex}
 
 
-# Look for a particular option in a stage, otherwise return the default 
+# Look for a particular option in a stage, otherwise return the default
 def getStageOptions(options, stage, optionName):
     try:
         return options.stages[stage][optionName]
@@ -117,7 +118,7 @@ def distributedCommand(stage, comm, options):
         literals = None
     logDir = options.pipeline['logDir']
     verbosity = options.pipeline['verbose']
-    script = PBS_Script(command=comm, walltime=time, name=stage, memInGB=mem,
+    script = SGE_Script(command=comm, walltime=time, name=stage, memInGB=mem,
                         queue=queue, moduleList=mods, logDir=logDir, literals=literals)
     return script.runJobAndWait(stage, logDir, verbosity)
 
@@ -127,6 +128,9 @@ def distributedCommand(stage, comm, options):
 def runStageCheck(stage, flag_file, *args):
     status = runStage(stage, *args)
     if status == 0:
+        # HACK: must wait fs changes to propagate on bio21 hpc nfs. 1 minute is sufficent, maybe
+        # excessive but safe
+        time.sleep(60)
         open(flag_file, 'w').close()
     else:
         command = getCommand(stage, pipeline_options)
