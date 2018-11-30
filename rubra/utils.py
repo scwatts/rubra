@@ -132,8 +132,8 @@ def distributedCommand(stage, comm, options):
 def runStageCheck(stage, flag_file, *args):
     status = runStage(stage, *args)
 
-    # On Spartan must sleep for at most 60 seconds for NFS to sync
-    time.sleep(60)
+    # MASSIVE appears occasionally require some time between jobs for the FS to sync
+    time.sleep(10)
 
     if status == 0:
         open(flag_file, 'w').close()
