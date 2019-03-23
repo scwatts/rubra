@@ -150,7 +150,7 @@ class SLURM_Job(object):
         self.mem = '--mem=' + str(memInGB * 1024) if memInGB is not None else ''
         self.moduleList = moduleList
         self.logDir = logDir if logDir is not None else ''
-        self.queue = '--exclusive' if queue is not None else ''
+        self.queue = ''
         self.literals = literals if literals is not None else ''
 
     def __str__(self):
